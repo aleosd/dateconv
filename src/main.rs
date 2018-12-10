@@ -1,7 +1,7 @@
+extern crate clap;
 extern crate chrono;
 extern crate regex;
 
-use std::env;
 use chrono::prelude::*;
 use std::process;
 use regex::Regex;
@@ -27,13 +27,17 @@ fn tsdt(unix_timestamp: i64) -> String {
 
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        eprintln!("Error! Provide exactly one date to convert");
-        process::exit(1);
-    }
+    let args = clap::App::new("Unixtime date converter")
+                .version("0.1.0")
+                .author("Osadchuk A <osadchuk.aleksey@playrix.com>")
+                .about("Converts unixtime to YYYY-MM-DD and vice versa")
+                .arg(clap::Arg::with_name("date")
+                     .help("Date to parse")
+                     .required(true)
+                     .index(1))
+                .get_matches();
 
-    let given_date = &args[1];
+    let given_date = args.value_of("date").unwrap();
     if given_date.parse::<i64>().is_ok() {
         let datetime = tsdt(given_date.parse::<i64>().unwrap());
         println!("{}", datetime);
