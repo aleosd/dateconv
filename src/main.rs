@@ -12,10 +12,10 @@ fn dtts(date_str: &str, with_time: bool) -> i64 {
         let parsed_result = NaiveDateTime::parse_from_str(date_str, "%Y-%m-%d %H:%M:%S").unwrap();
         return parsed_result.timestamp();
     } else {
-        let new_date_str = date_str.to_owned();
-        let datetime_str = new_date_str + " 00:00:00";
-        let parsed_result = NaiveDateTime::parse_from_str(&datetime_str, "%Y-%m-%d %H:%M:%S").unwrap();
-        return parsed_result.timestamp();
+        let native_time = NaiveTime::from_hms(0, 0, 0);
+        let date = NaiveDate::parse_from_str(date_str, "%Y-%m-%d").unwrap();
+        let datetime = date.and_time(native_time);
+        return datetime.timestamp();
     }
 }
 
