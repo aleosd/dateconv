@@ -7,8 +7,11 @@ use std::process;
 use regex::Regex;
 
 
-fn dtts(date_str: &str, with_time: bool) -> i64 {
+fn dtts(date_str: &str, with_time: bool, with_sec: bool) -> i64 {
     if with_time {
+        let parsed_result = NaiveDateTime::parse_from_str(date_str, "%Y-%m-%d %H:%M").unwrap();
+        return parsed_result.timestamp();
+    } else if with_sec {
         let parsed_result = NaiveDateTime::parse_from_str(date_str, "%Y-%m-%d %H:%M:%S").unwrap();
         return parsed_result.timestamp();
     } else {
@@ -28,9 +31,9 @@ fn tsdt(unix_timestamp: i64) -> String {
 
 fn main() {
     let args = clap::App::new("Unixtime date converter")
-                .version("0.1.0")
-                .author("Osadchuk A <osadchuk.aleksey@playrix.com>")
-                .about("Converts unixtime to YYYY-MM-DD and vice versa")
+                .version("0.1.1")
+                .author("Osadchuk A <osdalex@gmail.com>")
+                .about("Converts unix timestamp to YYYY-MM-DD and vice versa")
                 .arg(clap::Arg::with_name("date")
                      .help("Date to parse")
                      .required(true)
@@ -43,16 +46,20 @@ fn main() {
         println!("{}", datetime);
     } else {
         let date_re = Regex::new(r"^\d{4}-\d{2}-\d{2}$").unwrap();
-        let datetime_re = Regex::new(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$").unwrap();
+        let datetime_re = Regex::new(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$").unwrap();
+        let datetimesec_re = Regex::new(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$").unwrap();
 
         if date_re.is_match(given_date) {
-            let unix_timestamp = dtts(given_date, false);
+            let unix_timestamp = dtts(given_date, false, false);
             println!("{}", unix_timestamp);
         } else if datetime_re.is_match(given_date) {
-            let unix_timestamp = dtts(given_date, true);
+            let unix_timestamp = dtts(given_date, true, false);
+            println!("{}", unix_timestamp);
+        } else if datetimesec_re.is_match(given_date) {
+            let unix_timestamp = dtts(given_date, false, true);
             println!("{}", unix_timestamp);
         } else {
-            println!("Unsupported datetime format: {}", given_date);
+            println!("Unsupported datetime format: \"{}\", supported are YYYY-MM-DD, YYYY-MM-DD HH:MM and YYYY-MM-DD HH:MM:SS", given_date);
             process::exit(1);
         }
     }
